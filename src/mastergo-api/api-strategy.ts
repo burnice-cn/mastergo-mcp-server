@@ -13,11 +13,11 @@ export type JsonSchemaObject = {
 };
 
 export type MasterGoApiMetadata = {
-  method: string;
-  title: string;
-  description: string;
-  resultDescription: string;
-  readOnly: boolean;
+  readonly method: string;
+  readonly title: string;
+  readonly description: string;
+  readonly resultDescription: string;
+  readonly readOnly: boolean;
 };
 
 export type MasterGoApiListItem = Pick<MasterGoApiMetadata, "method" | "description">;
@@ -32,8 +32,11 @@ export interface MasterGoApiTransport {
 
 export abstract class MasterGoApiStrategy {
   protected abstract readonly paramsSchema: z.ZodObject;
+  private readonly metadata: MasterGoApiMetadata;
 
-  constructor(private readonly metadata: MasterGoApiMetadata) {}
+  constructor(metadata: MasterGoApiMetadata) {
+    this.metadata = Object.freeze({ ...metadata });
+  }
 
   get method(): string {
     return this.metadata.method;
@@ -57,7 +60,7 @@ export abstract class MasterGoApiStrategy {
   toScheme(): MasterGoApiScheme {
     return {
       ...this.metadata,
-      inputScheme: toJsonSchemaObject(this.paramsSchema),
+      inputScheme: toJsonSchemaObject(this.strictParamsSchema),
     };
   }
 
@@ -88,9 +91,13 @@ export abstract class MasterGoApiStrategy {
     return result;
   }
 
+  private get strictParamsSchema(): z.ZodObject {
+    return this.paramsSchema.strict();
+  }
+
   private parseParams(params?: Record<string, unknown>): Record<string, unknown> {
     try {
-      return this.paramsSchema.parse(params ?? {});
+      return this.strictParamsSchema.parse(params ?? {});
     } catch (error) {
       if (!(error instanceof z.ZodError)) {
         throw error;

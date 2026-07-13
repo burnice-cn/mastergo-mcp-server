@@ -8,6 +8,7 @@ import {
 } from "../../src/mastergo-api/api-registry.js";
 import {
   MasterGoApiStrategy,
+  type MasterGoApiMetadata,
   type MasterGoApiTransport,
 } from "../../src/mastergo-api/api-strategy.js";
 import type {
@@ -28,6 +29,14 @@ class StubStrategy extends MasterGoApiStrategy {
       resultDescription: `${title} result.`,
       readOnly: true,
     });
+  }
+}
+
+class MetadataStrategy extends MasterGoApiStrategy {
+  protected readonly paramsSchema = emptyParamsSchema;
+
+  constructor(metadata: MasterGoApiMetadata) {
+    super(metadata);
   }
 }
 
@@ -155,4 +164,66 @@ test("delegates known invocations and rejects unknown methods", async () => {
       return true;
     },
   );
+});
+
+test("keeps registered lookup and forwarding stable when caller metadata mutates", async () => {
+  const metadata = {
+    method: "mg.document",
+    title: "Read document",
+    description: "Current file",
+    resultDescription: "Read document result.",
+    readOnly: true,
+  };
+  const strategy = new MetadataStrategy(metadata);
+  const registry = new MasterGoApiRegistry().register(strategy);
+  const requests: InvokeMethodRequest[] = [];
+  const recordingTransport: MasterGoApiTransport = {
+    async request(payload: InvokeMethodRequest): Promise<BridgeResponseMessage> {
+      requests.push(payload);
+      return {
+        id: "response-immutable",
+        type: "response",
+        data: { code: 0, res: payload.method, errorMsg: "" },
+      };
+    },
+  };
+
+  metadata.method = "mg.mutated";
+  metadata.title = "Mutated title";
+  metadata.description = "Mutated description";
+
+  assert.deepEqual(registry.list(), [
+    { method: "mg.document", description: "Current file" },
+  ]);
+  assert.deepEqual(registry.list({ query: "read document" }), [
+    { method: "mg.document", description: "Current file" },
+  ]);
+  assert.deepEqual(registry.list({ query: "mutated" }), []);
+  assert.deepEqual(registry.getScheme("mg.document"), {
+    method: "mg.document",
+    title: "Read document",
+    description: "Current file",
+    resultDescription: "Read document result.",
+    readOnly: true,
+    inputScheme: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+  });
+  assert.equal(registry.getScheme("mg.mutated"), undefined);
+
+  const result = await registry.invoke("mg.document", undefined, recordingTransport);
+  assert.equal(result.data.res, "mg.document");
+  assert.deepEqual(requests, [
+    {
+      method: "mg.document",
+      params: {},
+    },
+  ]);
+  await assert.rejects(
+    registry.invoke("mg.mutated", undefined, recordingTransport),
+    /Unknown MasterGo API method: mg\.mutated/,
+  );
+  assert.equal(requests.length, 1);
 });

@@ -45,6 +45,21 @@ class EchoStrategy extends MasterGoApiStrategy {
   }
 }
 
+class SuppliedSchemaStrategy extends MasterGoApiStrategy {
+  protected readonly paramsSchema: z.ZodObject;
+
+  constructor(method: string, schema: z.ZodObject) {
+    super({
+      method,
+      title: `Test ${method}`,
+      description: `Test ${method} params.`,
+      resultDescription: `Test ${method} result.`,
+      readOnly: true,
+    });
+    this.paramsSchema = schema;
+  }
+}
+
 class RecordingTransport implements MasterGoApiTransport {
   readonly requests: InvokeMethodRequest[] = [];
 
@@ -124,3 +139,47 @@ test("preserves nonzero bridge responses without transforming them", async () =>
 
   assert.strictEqual(result, bridgeError);
 });
+
+const nonStrictSchemas = [
+  {
+    name: "default-strip",
+    schema: z.object({ name: z.string().trim() }),
+  },
+  {
+    name: "loose",
+    schema: z.object({ name: z.string().trim() }).loose(),
+  },
+  {
+    name: "catchall",
+    schema: z.object({ name: z.string().trim() }).catchall(z.string()),
+  },
+] as const;
+
+for (const { name, schema } of nonStrictSchemas) {
+  test(`normalizes ${name} object schemas to strict generation and parsing`, async () => {
+    const suppliedSchemaStrategy = new SuppliedSchemaStrategy(`test.${name}`, schema);
+    const transport = new RecordingTransport(response(0, "unchanged"));
+
+    assert.equal(
+      suppliedSchemaStrategy.toScheme().inputScheme.additionalProperties,
+      false,
+    );
+
+    await suppliedSchemaStrategy.invoke(transport, { name: " Ada " });
+    assert.deepEqual(transport.requests, [
+      {
+        method: `test.${name}`,
+        params: { name: "Ada" },
+      },
+    ]);
+
+    await assert.rejects(
+      suppliedSchemaStrategy.invoke(transport, {
+        name: "Ada",
+        unexpected: "value",
+      }),
+      new RegExp(`Invalid params for test\\.${name}: params: Unrecognized key`),
+    );
+    assert.equal(transport.requests.length, 1);
+  });
+}
