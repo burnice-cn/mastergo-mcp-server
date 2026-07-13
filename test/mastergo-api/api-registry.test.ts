@@ -31,6 +31,24 @@ class StubStrategy extends MasterGoApiStrategy {
   }
 }
 
+class UnexposableStrategy extends MasterGoApiStrategy {
+  protected readonly paramsSchema = z
+    .object({
+      createdAt: z.date(),
+    })
+    .strict();
+
+  constructor() {
+    super({
+      method: "test.unexposable",
+      title: "Unexposable API",
+      description: "Uses a parameter that cannot be represented in JSON Schema.",
+      resultDescription: "Unused result.",
+      readOnly: true,
+    });
+  }
+}
+
 const transport: MasterGoApiTransport = {
   async request(payload: InvokeMethodRequest): Promise<BridgeResponseMessage> {
     return {
@@ -61,7 +79,7 @@ test("preserves registration order and filters method, title, and description ca
   ]);
 });
 
-test("rejects empty, whitespace, and duplicate method registrations", () => {
+test("rejects empty, whitespace-only, and duplicate method registrations", () => {
   const registry = new MasterGoApiRegistry();
   registry.register(new StubStrategy("mg.document", "Read document", "Current file"));
 
@@ -77,6 +95,39 @@ test("rejects empty, whitespace, and duplicate method registrations", () => {
     () => registry.register(new StubStrategy("mg.document", "Duplicate", "Duplicate")),
     /Duplicate MasterGo API method: mg\.document/,
   );
+});
+
+test("rejects method registrations with leading whitespace", () => {
+  const registry = new MasterGoApiRegistry();
+
+  assert.throws(
+    () => registry.register(new StubStrategy(" mg.leading", "Leading", "Leading")),
+    {
+      message:
+        "MasterGo API method must not contain leading or trailing whitespace:  mg.leading",
+    },
+  );
+  assert.deepEqual(registry.list(), []);
+});
+
+test("rejects method registrations with trailing whitespace", () => {
+  const registry = new MasterGoApiRegistry();
+
+  assert.throws(
+    () => registry.register(new StubStrategy("mg.trailing ", "Trailing", "Trailing")),
+    {
+      message:
+        "MasterGo API method must not contain leading or trailing whitespace: mg.trailing ",
+    },
+  );
+  assert.deepEqual(registry.list(), []);
+});
+
+test("rejects strategies whose schemes cannot be exposed without modifying the registry", () => {
+  const registry = new MasterGoApiRegistry();
+
+  assert.throws(() => registry.register(new UnexposableStrategy()));
+  assert.deepEqual(registry.list(), []);
 });
 
 test("returns registered schemes and undefined for unknown methods", () => {

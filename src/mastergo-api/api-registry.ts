@@ -17,15 +17,24 @@ export class MasterGoApiRegistry {
   private readonly strategies = new Map<string, MasterGoApiStrategy>();
 
   register(strategy: MasterGoApiStrategy): this {
-    if (!strategy.method.trim()) {
+    const method = strategy.method;
+
+    if (!method.trim()) {
       throw new Error("MasterGo API method must not be empty.");
     }
 
-    if (this.strategies.has(strategy.method)) {
-      throw new Error(`Duplicate MasterGo API method: ${strategy.method}`);
+    if (method !== method.trim()) {
+      throw new Error(
+        `MasterGo API method must not contain leading or trailing whitespace: ${method}`,
+      );
     }
 
-    this.strategies.set(strategy.method, strategy);
+    if (this.strategies.has(method)) {
+      throw new Error(`Duplicate MasterGo API method: ${method}`);
+    }
+
+    strategy.toScheme();
+    this.strategies.set(method, strategy);
     return this;
   }
 
