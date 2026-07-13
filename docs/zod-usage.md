@@ -28,7 +28,7 @@ yarn add zod
 import { z } from "zod";
 ```
 
-项目中已经在 [src/index.ts](/home/ostangxinzhu/MyProjects/mastergo-mcp-server-new/mcp-server/src/index.ts) 使用了这个导入。
+项目中已经在 [src/index.ts](../src/index.ts) 使用了这个导入。
 
 ## 在 MCP Tool 中定义输入
 
@@ -264,7 +264,7 @@ z.enum(["GET", "POST"]).default("GET")
 
 ## 后续扩展示例
 
-如果后续要新增一个固定的 MasterGo API 方法，先在 `mastergo-api-bridge` 中新增并注册匹配的 `ApiHandler`，再在 `mcp-server/src/mastergo-api/strategies/<domain>/` 下新增独立策略，并从对应领域的 `index.ts` 导出。策略负责方法元数据、Zod 参数 schema、bridge 转发和可选的结果转换；`mastergo_api_scheme` 的 JSON Schema 直接由这份 Zod schema 生成，不需要集中式 API 目录或第二份手写输入 schema。
+如果后续要新增一个固定的 MasterGo API 方法，先在 `mastergo-api-bridge` 中新增并注册匹配的 `ApiHandler`，再在 `mcp-server/src/mastergo-api/strategies/<domain>/` 下新增独立策略，并从对应领域的 `index.ts` 导出。如果新建了领域集合，还必须在 `src/mastergo-api/register-apis.ts` 中导入并加入注册列表。策略负责方法元数据、Zod 参数 schema、bridge 转发和可选的结果转换；`mastergo_api_scheme` 的 JSON Schema 直接由这份 Zod schema 生成，不需要集中式 API 目录或第二份手写输入 schema。
 
 如果某个高频能力需要升级成专用 MCP 工具，也可以这样写：
 

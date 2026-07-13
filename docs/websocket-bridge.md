@@ -74,7 +74,7 @@ MCP tool 侧使用三段式：
 - `payload.method`：MasterGo API 方法名，例如 `mg.document`、`node.page`。
 - `payload.params`：可选参数对象，由具体 API 方法决定。
 
-当前 `mastergo-api-bridge` 已经实现了 `mg.apiVersion`、`mg.document`、`node.page`。新增 MasterGo API 时，需要在插件侧新增并注册匹配的 `ApiHandler`，同时在 `mcp-server` 的 `src/mastergo-api/strategies/<domain>/` 下新增对应策略，并从该领域的 `index.ts` 导出。策略中的 Zod 参数 schema 负责调用前的校验和规范化，同时生成 `mastergo_api_scheme` 返回的 `inputScheme`。
+当前 `mastergo-api-bridge` 已经实现了 `mg.apiVersion`、`mg.document`、`node.page`。新增 MasterGo API 时，需要在插件侧新增并注册匹配的 `ApiHandler`，同时在 `mcp-server` 的 `src/mastergo-api/strategies/<domain>/` 下新增对应策略，并从该领域的 `index.ts` 导出。如果新建了领域集合，还必须在 `src/mastergo-api/register-apis.ts` 中导入并加入注册列表。策略中的 Zod 参数 schema 负责调用前的校验和规范化，同时生成 `mastergo_api_scheme` 返回的 `inputScheme`。
 
 ## 成功响应
 

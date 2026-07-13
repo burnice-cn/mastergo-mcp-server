@@ -23,15 +23,14 @@ yarn install
 
 ## Configure
 
-Copy `.env.example` values into your shell:
+The server reads configuration from `process.env` and does not auto-load a
+`.env` file. Export the example values in the current shell before starting the
+server so child processes inherit them:
 
 ```bash
-MCP_HTTP_HOST=127.0.0.1
-MCP_HTTP_PORT=3000
-MCP_HTTP_PATH=/mcp
-MASTERGO_BRIDGE_WS_PATH=/bridge
-MASTERGO_BRIDGE_TOKEN=
-MASTERGO_BRIDGE_REQUEST_TIMEOUT_MS=10000
+set -a
+. ./.env.example
+set +a
 ```
 
 Default endpoints:
@@ -97,7 +96,9 @@ To add a method:
 
 1. Add and register the matching `ApiHandler` in `mastergo-api-bridge`.
 2. Add the strategy file in the appropriate domain directory.
-3. Export the strategy from that domain's `index.ts`.
+3. Export the strategy from that domain's `index.ts`. If this creates a new
+   domain collection, also import and include it in
+   `src/mastergo-api/register-apis.ts`.
 4. Run:
 
    ```bash
