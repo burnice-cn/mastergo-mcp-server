@@ -1,4 +1,33 @@
 {
   "name": "mcp-server",
-  "packageManager": "yarn@4.9.1"
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server for calling MasterGo APIs through a local bridge.",
+  "main": "./dist/index.js",
+  "bin": {
+    "mastergo-mcp-server": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx --test",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "yarn@4.9.1",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "ws": "^8.21.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@types/ws": "^8",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3"
+  }
 }
