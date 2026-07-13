@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import {
   MasterGoApiStrategy,
+  type JsonSchemaObject,
   type MasterGoApiTransport,
 } from "../../src/mastergo-api/api-strategy.js";
 import type {
@@ -16,6 +17,15 @@ const paramsSchema = z
     name: z.string().trim().min(1).describe("Name to echo."),
   })
   .strict();
+
+const schemaWithTypedAdditionalProperties = {
+  type: "object",
+  additionalProperties: {
+    type: "string",
+  },
+} satisfies JsonSchemaObject;
+
+void schemaWithTypedAdditionalProperties;
 
 class EchoStrategy extends MasterGoApiStrategy {
   protected readonly paramsSchema = paramsSchema;
