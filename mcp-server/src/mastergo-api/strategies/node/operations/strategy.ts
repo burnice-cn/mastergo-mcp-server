@@ -9,6 +9,9 @@ export type NodeOperationDefinition = {
   readonly method: string;
   readonly readOnly?: boolean;
   readonly paramsSchema: z.ZodObject;
+  readonly title?: string;
+  readonly description?: string;
+  readonly resultDescription?: string;
 };
 
 class NodeOperationStrategy extends MasterGoApiStrategy {
@@ -31,15 +34,24 @@ export function operation(
 export function createNodeOperationStrategies(
   definitions: readonly NodeOperationDefinition[],
 ): readonly MasterGoApiStrategy[] {
-  return definitions.map(({ method, readOnly = false, paramsSchema }) => {
+  return definitions.map(({
+    method,
+    readOnly = false,
+    paramsSchema,
+    title,
+    description,
+    resultDescription,
+  }) => {
     const label = method.replace(/^node\./, "node ");
 
     return new NodeOperationStrategy(
       {
         method,
-        title: label,
-        description: `Invoke the ${method} MasterGo node operation through the bridge.`,
+        title: title ?? label,
+        description:
+          description ?? `Invoke the ${method} MasterGo node operation through the bridge.`,
         resultDescription:
+          resultDescription ??
           "Operation result. Mutating operations usually return a compact node summary.",
         readOnly,
       },

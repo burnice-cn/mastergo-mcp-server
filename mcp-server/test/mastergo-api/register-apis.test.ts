@@ -457,6 +457,26 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.equal(registry.getScheme("node.setFills")?.readOnly, false);
   assert.equal(registry.getScheme("node.findAllWithCriteria")?.readOnly, true);
+  assert.equal(
+    registry.getScheme("node.text.setRangeFontSize")?.description,
+    "Set font size for a text range on a TextNode or connector text sublayer.",
+  );
+  assert.equal(
+    registry.getScheme("node.setFills")?.description,
+    "Replace the node fills array, commonly used to set solid, gradient, or image fills.",
+  );
+  assert.equal(
+    registry.getScheme("node.findAll")?.description,
+    "Find descendant scene nodes with pagination and return compact node summaries.",
+  );
+  assert.equal(
+    registry.getScheme("node.exportAsync")?.description,
+    "Export a node asynchronously and return a string or base64 encoded binary payload.",
+  );
+  assert.equal(
+    registry.getScheme("node.component.createInstance")?.description,
+    "Create an instance from a component node and return the new instance summary.",
+  );
   assert.deepEqual(registry.getScheme("mg.codegen.getCode")?.inputScheme, {
     type: "object",
     properties: {
