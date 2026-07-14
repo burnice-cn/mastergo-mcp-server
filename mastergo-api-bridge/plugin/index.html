@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>mastergo-api-bridge</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #1f2328;
+            background: #f6f8fa;
+        }
+
+        main {
+            display: grid;
+            gap: 12px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        dl {
+            display: grid;
+            grid-template-columns: 72px 1fr;
+            gap: 8px;
+            margin: 0;
+        }
+
+        dt {
+            color: #57606a;
+        }
+
+        dd {
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .status {
+            width: fit-content;
+            min-height: 24px;
+            padding: 3px 8px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            background: #ffffff;
+        }
+
+        .connected {
+            border-color: #1a7f37;
+            color: #1a7f37;
+        }
+
+        .disconnected {
+            border-color: #cf222e;
+            color: #cf222e;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>mastergo-api-bridge</h1>
+        <dl>
+            <dt>Status</dt>
+            <dd><span id="status" class="status disconnected">Disconnected</span></dd>
+            <dt>Endpoint</dt>
+            <dd id="endpoint">ws://127.0.0.1:3000/bridge</dd>
+            <dt>Last event</dt>
+            <dd id="last-event">Waiting</dd>
+        </dl>
+    </main>
+
+    <script>
+        const endpoint = 'ws://127.0.0.1:3000/bridge';
+        const statusEl = document.getElementById('status');
+        const endpointEl = document.getElementById('endpoint');
+        const lastEventEl = document.getElementById('last-event');
+        const pendingPluginRequests = new Map();
+
+        endpointEl.textContent = endpoint;
+        connect();
+
+        function connect() {
+            const ws = new WebSocket(endpoint);
+
+            ws.addEventListener('open', () => {
+                setStatus('Connected', true);
+                setLastEvent('Connected to mcp-server');
+                ws.send(JSON.stringify({
+                    type: 'hello',
+                    name: 'mastergo-api-bridge',
+                    version: '0.1.0',
+                    capabilities: ['mastergo.invoke']
+                }));
+            });
+
+            ws.addEventListener('message', async (event) => {
+                let message;
+
+                try {
+                    message = JSON.parse(event.data);
+                } catch (error) {
+                    setLastEvent('Invalid JSON message');
+                    return;
+                }
+
+                if (message.type !== 'request' || message.method !== 'mastergo.invoke') {
+                    return;
+                }
+
+                setLastEvent(formatRequestLabel(message.payload));
+
+                try {
+                    const result = await callPlugin(message.payload);
+                    ws.send(JSON.stringify({
+                        id: message.id,
+                        type: 'response',
+                        data: {
+                            code: result.code,
+                            res: result.res,
+                            errorMsg: result.errorMsg
+                        }
+                    }));
+                } catch (error) {
+                    ws.send(JSON.stringify({
+                        id: message.id,
+                        type: 'response',
+                        data: {
+                            code: -1,
+                            res: null,
+                            errorMsg: error instanceof Error ? error.message : String(error)
+                        }
+                    }));
+                }
+            });
+
+            ws.addEventListener('close', () => {
+                setStatus('Disconnected', false);
+                setLastEvent('Reconnecting in 1000ms');
+                setTimeout(connect, 1000);
+            });
+
+            ws.addEventListener('error', () => {
+                setStatus('Connection error', false);
+            });
+        }
+
+        function callPlugin(payload) {
+            return new Promise((resolve, reject) => {
+                const id = createId();
+                const timeout = setTimeout(() => {
+                    pendingPluginRequests.delete(id);
+                    reject(new Error('Plugin request timed out'));
+                }, 10000);
+
+                pendingPluginRequests.set(id, {
+                    resolve,
+                    reject,
+                    timeout
+                });
+
+                parent.postMessage({
+                    pluginMessage: {
+                        type: 'bridge.request',
+                        id,
+                        payload
+                    }
+                }, '*');
+            });
+        }
+
+        window.onmessage = (event) => {
+            const message = event.data.pluginMessage;
+
+            if (!message || message.type !== 'bridge.response') {
+                return;
+            }
+
+            const pending = pendingPluginRequests.get(message.id);
+            if (!pending) {
+                return;
+            }
+
+            clearTimeout(pending.timeout);
+            pendingPluginRequests.delete(message.id);
+
+            const data = message.data || {};
+            pending.resolve({
+                code: Number.isInteger(data.code) ? data.code : -1,
+                res: Object.prototype.hasOwnProperty.call(data, 'res') ? data.res : null,
+                errorMsg: typeof data.errorMsg === 'string' ? data.errorMsg : ''
+            });
+        };
+
+        function setStatus(text, connected) {
+            statusEl.textContent = text;
+            statusEl.classList.toggle('connected', connected);
+            statusEl.classList.toggle('disconnected', !connected);
+        }
+
+        function setLastEvent(text) {
+            lastEventEl.textContent = text;
+        }
+
+        function formatRequestLabel(payload) {
+            if (!payload || typeof payload !== 'object') {
+                return 'Unknown request';
+            }
+
+            return String(payload.method || 'Unknown request');
+        }
+
+        function createId() {
+            if (globalThis.crypto?.randomUUID) {
+                return globalThis.crypto.randomUUID();
+            }
+
+            return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        }
+    </script>
+</body>
+
+</html>

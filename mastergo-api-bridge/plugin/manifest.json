@@ -1,0 +1,13 @@
+{
+  "name": "mastergo-api-bridge",
+  "id": 198347642800023,
+  "main": "index.js",
+  "ui": "index.html",
+  "editor_type": [
+    "canvas",
+    "devMode"
+  ],
+  "capabilities": [
+    "inspect"
+  ]
+}
