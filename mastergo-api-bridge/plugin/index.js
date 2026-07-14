@@ -29,17 +29,6 @@
     return handlers.get(method);
   };
 
-  // src/plugin/api/mg/api-version.ts
-  var ApiVersionHandler = class extends ApiHandler {
-    constructor() {
-      super("mg.apiVersion");
-    }
-    async call() {
-      return mg.apiVersion;
-    }
-  };
-  var apiVersionHandler = new ApiVersionHandler();
-
   // src/plugin/api/compact-node.ts
   function toCompactNode(node, options = {}) {
     if (!node) {
@@ -133,6 +122,48 @@
     }
     return (_b = (_a = node.parent) == null ? void 0 : _a.id) != null ? _b : null;
   }
+
+  // src/plugin/api/icon/insert.ts
+  var IconInsertHandler = class extends ApiHandler {
+    constructor() {
+      super("icon.insert");
+    }
+    async call(params) {
+      if (!(params == null ? void 0 : params.svg)) {
+        throw new Error("icon.insert requires params.svg");
+      }
+      const node = await mg.createNodeFromSvgAsync(params.svg);
+      if (params.name) {
+        node.name = params.name;
+      }
+      if (typeof params.x === "number") {
+        node.x = params.x;
+      }
+      if (typeof params.y === "number") {
+        node.y = params.y;
+      }
+      if (typeof params.size === "number") {
+        node.resize(params.size, params.size);
+      }
+      const summary = toCompactNode(node);
+      if (!summary) {
+        throw new Error("Failed to summarize inserted icon node.");
+      }
+      return summary;
+    }
+  };
+  var iconInsertHandler = new IconInsertHandler();
+
+  // src/plugin/api/mg/api-version.ts
+  var ApiVersionHandler = class extends ApiHandler {
+    constructor() {
+      super("mg.apiVersion");
+    }
+    async call() {
+      return mg.apiVersion;
+    }
+  };
+  var apiVersionHandler = new ApiVersionHandler();
 
   // src/plugin/api/mg/basic.ts
   var CallbackHandler = class extends ApiHandler {
@@ -1969,6 +2000,7 @@
   var registerApis = () => {
     registerApiHandler(apiVersionHandler);
     registerApiHandler(documentHandler);
+    registerApiHandler(iconInsertHandler);
     for (const handler of basicMgApiHandlers) {
       registerApiHandler(handler);
     }

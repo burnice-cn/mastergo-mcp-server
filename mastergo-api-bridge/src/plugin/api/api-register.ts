@@ -1,4 +1,5 @@
 import { registerApiHandler } from "./api-handler";
+import { iconInsertHandler } from "./icon/insert";
 import { apiVersionHandler } from "./mg/api-version";
 import { basicMgApiHandlers } from "./mg/basic";
 import { codegenApiHandlers } from "./mg/codegen";
@@ -10,6 +11,7 @@ import { nodeSummaryHandler } from "./node/summary";
 export const registerApis = () => {
   registerApiHandler(apiVersionHandler);
   registerApiHandler(documentHandler);
+  registerApiHandler(iconInsertHandler);
   for (const handler of basicMgApiHandlers) {
     registerApiHandler(handler);
   }

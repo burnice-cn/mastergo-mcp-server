@@ -67,6 +67,11 @@ test("registers the current API catalog in stable order with generated schemes",
       "mg.getLocalCornerRadiusStyles",
       "mg.getLocalPaddingStyles",
       "mg.getLocalSpacingStyles",
+      "icon.sources",
+      "icon.search",
+      "icon.getSvg",
+      "icon.insert",
+      "icon.cache.clear",
       "node.page",
       "node.summary",
       "node.setName",
@@ -507,6 +512,93 @@ test("registers the current API catalog in stable order with generated schemes",
     required: ["layerId", "framework"],
     additionalProperties: false,
   });
+  assert.deepEqual(registry.getScheme("icon.search"), {
+    method: "icon.search",
+    title: "Search SVG icons",
+    description:
+      "Search configured SVG icon sources and return icon candidates without inserting them.",
+    resultDescription:
+      "Paged icon candidates with icon ids, source metadata, collections, and optional preview SVG.",
+    readOnly: true,
+    inputScheme: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          minLength: 1,
+          description: "Icon search keyword, for example search, home, trash, or arrow-left.",
+        },
+        source: {
+          anyOf: [
+            {
+              type: "string",
+              enum: ["iconify"],
+            },
+            {
+              type: "null",
+            },
+          ],
+          description: "Icon source id. Defaults to iconify.",
+        },
+        collections: {
+          anyOf: [
+            {
+              type: "array",
+              items: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            {
+              type: "null",
+            },
+          ],
+          description:
+            "Optional Iconify collection prefixes to search, such as lucide, mdi, tabler, or material-symbols.",
+        },
+        limit: {
+          anyOf: [
+            {
+              type: "integer",
+              minimum: 1,
+              maximum: 50,
+            },
+            {
+              type: "null",
+            },
+          ],
+          description: "Maximum number of results. Defaults to 20.",
+        },
+        offset: {
+          anyOf: [
+            {
+              type: "integer",
+              minimum: 0,
+              maximum: 9007199254740991,
+            },
+            {
+              type: "null",
+            },
+          ],
+          description: "Result offset for pagination. Defaults to 0.",
+        },
+        includePreviewSvg: {
+          anyOf: [
+            {
+              type: "boolean",
+            },
+            {
+              type: "null",
+            },
+          ],
+          description: "Whether to include sanitized preview SVG for each returned icon.",
+        },
+      },
+      required: ["query"],
+      additionalProperties: false,
+    },
+  });
+  assert.equal(registry.getScheme("icon.insert")?.readOnly, false);
   assert.deepEqual(registry.getScheme("node.findAll")?.inputScheme, {
     type: "object",
     properties: {
@@ -603,6 +695,10 @@ test("validates concrete strategy params before forwarding", async () => {
 
   await assert.rejects(registry.invoke("node.page", {}, transport), /id:/);
   assert.equal(requests.length, 0);
+
+  const iconSources = await registry.invoke("icon.sources", undefined, transport);
+  assert.equal(requests.length, 0);
+  assert.equal(iconSources.data.code, 0);
 
   await registry.invoke("node.page", { id: "page-1" }, transport);
   await registry.invoke("mg.getNodeById", { id: "node-1" }, transport);
