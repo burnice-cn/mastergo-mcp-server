@@ -27,24 +27,6 @@ function createMcpServer(): McpServer {
   );
 
   server.registerTool(
-    "mastergo_config",
-    {
-      title: "Read MasterGo MCP configuration",
-      description:
-        "Return the active MCP HTTP endpoint, WebSocket bridge endpoint, and bridge connection status.",
-    },
-    async () =>
-      jsonResult({
-        mcpUrl: config.mcpUrl,
-        bridgeUrl: config.bridgeUrl,
-        bridgePath: config.bridgePath,
-        bridgeTokenRequired: Boolean(config.bridgeToken),
-        bridgeRequestTimeoutMs: config.bridgeRequestTimeoutMs,
-        bridge: bridgeServer.status(),
-      }),
-  );
-
-  server.registerTool(
     "mastergo_api_list",
     {
       title: "List MasterGo APIs",

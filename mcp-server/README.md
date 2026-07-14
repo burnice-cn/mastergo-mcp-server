@@ -53,7 +53,6 @@ yarn start
 
 ## Tools
 
-- `mastergo_config`: returns the active bridge configuration.
 - `mastergo_api_list`: lists MasterGo API methods with method and description.
 - `mastergo_api_scheme`: returns the input scheme for one API method.
 - `mastergo_api_call`: calls a MasterGo API method through the connected

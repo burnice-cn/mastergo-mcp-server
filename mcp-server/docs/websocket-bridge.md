@@ -41,7 +41,7 @@ const ws = new WebSocket("ws://127.0.0.1:3000/bridge?token=YOUR_TOKEN");
 }
 ```
 
-该信息会展示在 `mastergo_config` 工具和 `/health` 返回值中。
+该信息会展示在 `/health` 返回值中。
 
 ## 请求消息
 
@@ -139,13 +139,4 @@ MCP tool 侧使用三段式：
 
 ```bash
 curl http://127.0.0.1:3000/health
-```
-
-也可以通过 MCP tool 调用：
-
-```json
-{
-  "name": "mastergo_config",
-  "arguments": {}
-}
 ```

@@ -1,7 +1,7 @@
 // 调用mastergo方法请求
 export type InvokeMethodRequest = {
   method: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 };
 
 export type PluginRequestMessage = {
