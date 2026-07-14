@@ -1,11 +1,11 @@
 import {
   type ApiBridgeResult,
   type InvokeMethodRequest,
-  type PluginRequestMessage,
 } from "../shared/protocol";
 import { getApiHandler, registerApiHandler } from "./api/api-handler";
 import { registerApis } from "./api/api-register";
 import { apiVersionHandler } from "./api/mg/api-version";
+import { parsePluginRequestMessage } from "./message";
 
 const UI_SIZE = {
   width: 360,
@@ -17,22 +17,23 @@ mg.showUI(__html__, UI_SIZE);
 registerApis();
 
 mg.ui.onmessage = async (message: unknown) => {
-  if (!isPluginRequestMessage(message)) {
+  const request = parsePluginRequestMessage(message);
+  if (!request) {
     return;
   }
 
   try {
-    const result = await handleBridgeRequest(message.payload);
+    const result = await handleBridgeRequest(request.payload);
 
     mg.ui.postMessage({
       type: "bridge.response",
-      id: message.id,
+      id: request.id,
       data: result,
     });
   } catch (error) {
     mg.ui.postMessage({
       type: "bridge.response",
-      id: message.id,
+      id: request.id,
       data: {
         code: -1,
         res: null,
@@ -53,21 +54,4 @@ async function handleBridgeRequest(payload: InvokeMethodRequest): Promise<ApiBri
     };
   }
   throw new Error(`No api-bridge handler registered for ${payload.method}`);
-}
-
-function isPluginRequestMessage(value: unknown): value is PluginRequestMessage {
-  return (
-    isRecord(value) &&
-    value.type === "bridge.request" &&
-    typeof value.id === "string" &&
-    isInvokeMethodRequest(value.payload)
-  );
-}
-
-function isInvokeMethodRequest(value: unknown): value is InvokeMethodRequest {
-  return isRecord(value) && typeof value.method === "string";
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

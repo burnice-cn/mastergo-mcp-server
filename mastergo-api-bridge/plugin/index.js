@@ -2014,6 +2014,27 @@
     }
   };
 
+  // src/plugin/message.ts
+  function parsePluginRequestMessage(value) {
+    const message = unwrapPluginMessage(value);
+    return isPluginRequestMessage(message) ? message : null;
+  }
+  function unwrapPluginMessage(value) {
+    if (!isRecord2(value) || !Object.prototype.hasOwnProperty.call(value, "pluginMessage")) {
+      return value;
+    }
+    return value.pluginMessage;
+  }
+  function isPluginRequestMessage(value) {
+    return isRecord2(value) && value.type === "bridge.request" && typeof value.id === "string" && isInvokeMethodRequest(value.payload);
+  }
+  function isInvokeMethodRequest(value) {
+    return isRecord2(value) && typeof value.method === "string";
+  }
+  function isRecord2(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
   // src/plugin/index.ts
   var UI_SIZE = {
     width: 360,
@@ -2022,20 +2043,21 @@
   mg.showUI(__html__, UI_SIZE);
   registerApis();
   mg.ui.onmessage = async (message) => {
-    if (!isPluginRequestMessage(message)) {
+    const request = parsePluginRequestMessage(message);
+    if (!request) {
       return;
     }
     try {
-      const result = await handleBridgeRequest(message.payload);
+      const result = await handleBridgeRequest(request.payload);
       mg.ui.postMessage({
         type: "bridge.response",
-        id: message.id,
+        id: request.id,
         data: result
       });
     } catch (error) {
       mg.ui.postMessage({
         type: "bridge.response",
-        id: message.id,
+        id: request.id,
         data: {
           code: -1,
           res: null,
@@ -2055,14 +2077,5 @@
       };
     }
     throw new Error(`No api-bridge handler registered for ${payload.method}`);
-  }
-  function isPluginRequestMessage(value) {
-    return isRecord2(value) && value.type === "bridge.request" && typeof value.id === "string" && isInvokeMethodRequest(value.payload);
-  }
-  function isInvokeMethodRequest(value) {
-    return isRecord2(value) && typeof value.method === "string";
-  }
-  function isRecord2(value) {
-    return typeof value === "object" && value !== null && !Array.isArray(value);
   }
 })();

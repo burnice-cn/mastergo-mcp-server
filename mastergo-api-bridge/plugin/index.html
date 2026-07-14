@@ -164,17 +164,15 @@
                 });
 
                 parent.postMessage({
-                    pluginMessage: {
-                        type: 'bridge.request',
-                        id,
-                        payload
-                    }
+                    type: 'bridge.request',
+                    id,
+                    payload
                 }, '*');
             });
         }
 
         window.onmessage = (event) => {
-            const message = event.data.pluginMessage;
+            const message = event.data.pluginMessage || event.data;
 
             if (!message || message.type !== 'bridge.response') {
                 return;
