@@ -1,6 +1,7 @@
 const ICONIFY_API_BASE_URL = "https://api.iconify.design";
 const MAX_SVG_BYTES = 200_000;
 const ICONIFY_REQUEST_TIMEOUT_MS = 10_000;
+const ICONIFY_MIN_SEARCH_LIMIT = 32;
 
 export type IconSource = {
   id: "iconify";
@@ -88,6 +89,7 @@ export async function searchIcons(params: IconSearchParams): Promise<IconSearchR
 
   const limit = params.limit ?? 20;
   const offset = params.offset ?? 0;
+  const apiLimit = Math.max(limit, ICONIFY_MIN_SEARCH_LIMIT);
   const includePreviewSvg = params.includePreviewSvg ?? false;
   const cacheKey = JSON.stringify({
     query: params.query,
@@ -103,7 +105,7 @@ export async function searchIcons(params: IconSearchParams): Promise<IconSearchR
 
   const url = new URL("/search", ICONIFY_API_BASE_URL);
   url.searchParams.set("query", params.query);
-  url.searchParams.set("limit", String(limit));
+  url.searchParams.set("limit", String(apiLimit));
   url.searchParams.set("start", String(offset));
 
   if (params.collections && params.collections.length > 0) {
@@ -111,7 +113,7 @@ export async function searchIcons(params: IconSearchParams): Promise<IconSearchR
   }
 
   const response = await fetchJson<IconifySearchResponse>(url);
-  const icons = response.icons ?? [];
+  const icons = (response.icons ?? []).slice(0, limit);
   const candidates: IconCandidate[] = [];
 
   for (const id of icons) {
@@ -134,7 +136,7 @@ export async function searchIcons(params: IconSearchParams): Promise<IconSearchR
     source: "iconify",
     query: params.query,
     total: response.total ?? icons.length,
-    limit: response.limit ?? limit,
+    limit,
     offset: response.start ?? offset,
     truncated: (response.start ?? offset) + icons.length < (response.total ?? icons.length),
     icons: candidates,

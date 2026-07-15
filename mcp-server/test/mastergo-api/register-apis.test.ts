@@ -514,11 +514,11 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.deepEqual(registry.getScheme("icon.search"), {
     method: "icon.search",
-    title: "Search SVG icons",
+    title: "Search SVG icons and illustrations",
     description:
-      "Search configured SVG icon sources and return icon candidates without inserting them.",
+      "Search configured SVG icon and illustration sources for editable SVG assets without inserting them.",
     resultDescription:
-      "Paged icon candidates with icon ids, source metadata, collections, and optional preview SVG.",
+      "Paged SVG icon or illustration candidates with ids, source metadata, collections, and optional preview SVG.",
     readOnly: true,
     inputScheme: {
       type: "object",
@@ -526,7 +526,8 @@ test("registers the current API catalog in stable order with generated schemes",
         query: {
           type: "string",
           minLength: 1,
-          description: "Icon search keyword, for example search, home, trash, or arrow-left.",
+          description:
+            "SVG icon or illustration search keyword, for example search, home, trash, arrow-left, empty-state, or chart.",
         },
         source: {
           anyOf: [
@@ -599,6 +600,10 @@ test("registers the current API catalog in stable order with generated schemes",
     },
   });
   assert.equal(registry.getScheme("icon.insert")?.readOnly, false);
+  assert.equal(
+    registry.getScheme("icon.insert")?.description,
+    "Fetch or sanitize an SVG icon/illustration and insert it as an editable vector node in the current MasterGo document.",
+  );
   assert.deepEqual(registry.getScheme("node.findAll")?.inputScheme, {
     type: "object",
     properties: {

@@ -112,10 +112,10 @@ class IconInsertStrategy extends MasterGoApiStrategy {
   constructor() {
     super({
       method: "icon.insert",
-      title: "Insert SVG icon",
+      title: "Insert SVG icon or illustration",
       description:
-        "Fetch or sanitize an SVG icon and insert it into the current MasterGo document.",
-      resultDescription: "Compact node summary for the inserted SVG frame.",
+        "Fetch or sanitize an SVG icon/illustration and insert it as an editable vector node in the current MasterGo document.",
+      resultDescription: "Compact node summary for the inserted editable SVG vector frame.",
       readOnly: false,
     });
   }
@@ -149,8 +149,8 @@ export const iconApiStrategies: readonly MasterGoApiStrategy[] = [
   local(
     {
       method: "icon.sources",
-      title: "List SVG icon sources",
-      description: "List configured SVG icon search sources.",
+      title: "List SVG asset sources",
+      description: "List configured SVG icon and illustration search sources.",
       resultDescription: "Available icon sources and their capabilities.",
       readOnly: true,
     },
@@ -160,11 +160,11 @@ export const iconApiStrategies: readonly MasterGoApiStrategy[] = [
   local(
     {
       method: "icon.search",
-      title: "Search SVG icons",
+      title: "Search SVG icons and illustrations",
       description:
-        "Search configured SVG icon sources and return icon candidates without inserting them.",
+        "Search configured SVG icon and illustration sources for editable SVG assets without inserting them.",
       resultDescription:
-        "Paged icon candidates with icon ids, source metadata, collections, and optional preview SVG.",
+        "Paged SVG icon or illustration candidates with ids, source metadata, collections, and optional preview SVG.",
       readOnly: true,
     },
     z
@@ -173,7 +173,7 @@ export const iconApiStrategies: readonly MasterGoApiStrategy[] = [
           .string()
           .min(1)
           .describe(
-            "Icon search keyword, for example search, home, trash, or arrow-left.",
+            "SVG icon or illustration search keyword, for example search, home, trash, arrow-left, empty-state, or chart.",
           ),
         source: sourceSchema,
         collections: z
@@ -203,9 +203,9 @@ export const iconApiStrategies: readonly MasterGoApiStrategy[] = [
   local(
     {
       method: "icon.getSvg",
-      title: "Get SVG icon",
-      description: "Fetch and sanitize one SVG icon by id without inserting it.",
-      resultDescription: "Sanitized SVG string and icon metadata.",
+      title: "Get SVG icon or illustration",
+      description: "Fetch and sanitize one SVG icon/illustration by id without inserting it.",
+      resultDescription: "Sanitized editable SVG string and source metadata.",
       readOnly: true,
     },
     iconSvgParamsSchema(),
