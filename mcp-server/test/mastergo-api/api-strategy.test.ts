@@ -88,6 +88,7 @@ function response(code: number, res: unknown): BridgeResponseMessage {
 test("generates a stable object input scheme from Zod", () => {
   assert.deepEqual(strategy.toScheme(), {
     method: "test.echo",
+    category: "test",
     title: "Echo a name",
     description: "Echo one validated name.",
     resultDescription: "The normalized name.",

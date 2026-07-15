@@ -211,6 +211,7 @@ test("registers the current API catalog in stable order with generated schemes",
   );
   assert.deepEqual(registry.getScheme("mg.apiVersion"), {
     method: "mg.apiVersion",
+    category: "mg",
     title: "Read MasterGo API version",
     description: "Return the MasterGo plugin API version exposed by the current sandbox.",
     resultDescription: "A string or version-like value returned by mg.apiVersion.",
@@ -223,6 +224,7 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.deepEqual(registry.getScheme("mg.document"), {
     method: "mg.document",
+    category: "mg",
     title: "Read document summary",
     description:
       "Return a compact summary of the current MasterGo document, including pages and the current page.",
@@ -237,6 +239,7 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.deepEqual(registry.getScheme("node.page"), {
     method: "node.page",
+    category: "node",
     title: "Read page summary",
     description:
       "Return a compact summary of one page by page id, including top-level child nodes and current selection ids.",
@@ -259,6 +262,7 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.deepEqual(registry.getScheme("mg.getNodeById"), {
     method: "mg.getNodeById",
+    category: "mg",
     title: "Get node by id",
     description: "Return a compact summary for one scene node by id, or null if it is not found.",
     resultDescription:
@@ -279,6 +283,7 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.deepEqual(registry.getScheme("mg.notify"), {
     method: "mg.notify",
+    category: "mg",
     title: "Show notification",
     description: "Display a MasterGo notification message in the current plugin sandbox.",
     resultDescription: "Notification status returned after the message is scheduled.",
@@ -365,6 +370,7 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.deepEqual(registry.getScheme("mg.createRectangle"), {
     method: "mg.createRectangle",
+    category: "mg",
     title: "Create rectangle node",
     description: "Create a rectangle node and return its compact summary.",
     resultDescription: "Compact summary for the created rectangle node.",
@@ -390,6 +396,7 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.deepEqual(registry.getScheme("mg.RGBAToHex"), {
     method: "mg.RGBAToHex",
+    category: "mg",
     title: "Convert RGBA to hex",
     description: "Convert an RGBA color object to a hex color string.",
     resultDescription: "Hex color string returned by mg.RGBAToHex.",
@@ -482,6 +489,24 @@ test("registers the current API catalog in stable order with generated schemes",
     registry.getScheme("node.component.createInstance")?.description,
     "Create an instance from a component node and return the new instance summary.",
   );
+  const fillsScheme = registry.getScheme("node.setFills")?.inputScheme.properties?.fills;
+  assert.equal((fillsScheme as { type?: string } | undefined)?.type, "array");
+  const solidPaintScheme = (fillsScheme as {
+    items?: { anyOf?: Array<{ properties?: Record<string, unknown> }> };
+  }).items?.anyOf?.[0];
+  assert.deepEqual(solidPaintScheme?.properties?.type, {
+    type: "string",
+    const: "SOLID",
+  });
+  assert.deepEqual(
+    (solidPaintScheme?.properties?.color as { properties?: Record<string, unknown> })
+      .properties?.r,
+    {
+      type: "number",
+      minimum: 0,
+      maximum: 1,
+    },
+  );
   assert.deepEqual(registry.getScheme("mg.codegen.getCode")?.inputScheme, {
     type: "object",
     properties: {
@@ -514,6 +539,7 @@ test("registers the current API catalog in stable order with generated schemes",
   });
   assert.deepEqual(registry.getScheme("icon.search"), {
     method: "icon.search",
+    category: "icon",
     title: "Search SVG icons and illustrations",
     description:
       "Search configured SVG icon and illustration sources for editable SVG assets without inserting them.",
@@ -710,11 +736,32 @@ test("validates concrete strategy params before forwarding", async () => {
   await registry.invoke("mg.RGBAToHex", {
     rgba: { r: 1, g: 0.5, b: 0, a: 1 },
   }, transport);
+  await registry.invoke("node.setFills", {
+    id: "node-1",
+    fills: [
+      {
+        type: "SOLID",
+        color: { r: 1, g: 0, b: 0, a: 1 },
+      },
+    ],
+  }, transport);
   await assert.rejects(
     registry.invoke("mg.RGBAToHex", {
       rgba: { r: 2, g: 0.5, b: 0, a: 1 },
     }, transport),
     /Invalid params for mg\.RGBAToHex: rgba\.r:/,
+  );
+  await assert.rejects(
+    registry.invoke("node.setFills", {
+      id: "node-1",
+      fills: [
+        {
+          type: "SOLID",
+          color: { r: 2, g: 0, b: 0, a: 1 },
+        },
+      ],
+    }, transport),
+    /Invalid params for node\.setFills:/,
   );
   assert.deepEqual(requests, [
     {
@@ -728,6 +775,18 @@ test("validates concrete strategy params before forwarding", async () => {
     {
       method: "mg.RGBAToHex",
       params: { rgba: { r: 1, g: 0.5, b: 0, a: 1 } },
+    },
+    {
+      method: "node.setFills",
+      params: {
+        id: "node-1",
+        fills: [
+          {
+            type: "SOLID",
+            color: { r: 1, g: 0, b: 0, a: 1 },
+          },
+        ],
+      },
     },
   ]);
 });

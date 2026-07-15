@@ -6,6 +6,11 @@ import type {
   MasterGoApiTransport,
 } from "./api-strategy.js";
 
+export type MasterGoApiCategory = {
+  id: string;
+  count: number;
+};
+
 export class UnknownMasterGoApiError extends Error {
   constructor(method: string) {
     super(`Unknown MasterGo API method: ${method}`);
@@ -38,22 +43,38 @@ export class MasterGoApiRegistry {
     return this;
   }
 
-  list(options: { query?: string } = {}): MasterGoApiListItem[] {
+  list(options: { query?: string; category?: string } = {}): MasterGoApiListItem[] {
     const query = options.query?.trim().toLowerCase();
+    const category = options.category?.trim().toLowerCase();
 
     return [...this.strategies.values()]
       .filter((strategy) => {
+        if (category && strategy.category.toLowerCase() !== category) {
+          return false;
+        }
+
         if (!query) {
           return true;
         }
 
         return (
           strategy.method.toLowerCase().includes(query) ||
+          strategy.category.toLowerCase().includes(query) ||
           strategy.title.toLowerCase().includes(query) ||
           strategy.description.toLowerCase().includes(query)
         );
       })
       .map((strategy) => strategy.toListItem());
+  }
+
+  categories(): MasterGoApiCategory[] {
+    const counts = new Map<string, number>();
+
+    for (const strategy of this.strategies.values()) {
+      counts.set(strategy.category, (counts.get(strategy.category) ?? 0) + 1);
+    }
+
+    return [...counts.entries()].map(([id, count]) => ({ id, count }));
   }
 
   getScheme(method: string): MasterGoApiScheme | undefined {

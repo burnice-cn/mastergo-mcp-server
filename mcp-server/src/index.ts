@@ -27,20 +27,39 @@ function createMcpServer(): McpServer {
   );
 
   server.registerTool(
+    "mastergo_api_categories",
+    {
+      title: "List MasterGo API categories",
+      description:
+        "List MasterGo API categories and counts. Use a category with mastergo_api_list to reduce the method list.",
+    },
+    async () =>
+      jsonResult({
+        categories: apiRegistry.categories(),
+        nextStep:
+          "Call mastergo_api_list with a category id to list only methods in that category.",
+      }),
+  );
+
+  server.registerTool(
     "mastergo_api_list",
     {
       title: "List MasterGo APIs",
       description:
-        "List available MasterGo API methods known by this MCP server. Returns method and description only.",
+        "List available MasterGo API methods known by this MCP server. Returns method, category, and description.",
       inputSchema: {
         query: z
           .string()
           .optional()
           .describe("Optional keyword filter matched against method, title, and description."),
+        category: z
+          .string()
+          .optional()
+          .describe("Optional category id from mastergo_api_categories, for example node.text or icon."),
       },
     },
-    async ({ query }) => {
-      const apis = apiRegistry.list({ query });
+    async ({ query, category }) => {
+      const apis = apiRegistry.list({ query, category });
 
       return jsonResult({
         count: apis.length,

@@ -41,6 +41,106 @@ export const rgbaSchema = z
     a: z.number().min(0).max(1),
   })
   .strict();
+export const solidPaintSchema = z
+  .object({
+    type: z.literal("SOLID"),
+    color: rgbaSchema,
+    isVisible: z.boolean().nullish(),
+    alpha: z.number().min(0).max(1).nullish(),
+    blendMode: z.string().nullish(),
+    name: z.string().nullish(),
+    colorStyleId: z.string().nullish(),
+  })
+  .strict();
+const colorStopSchema = z
+  .object({
+    position: z.number().min(0).max(1),
+    color: rgbaSchema,
+  })
+  .strict();
+const pointSchema = z
+  .object({
+    x: z.number(),
+    y: z.number(),
+  })
+  .strict();
+const paintCommonSchema = {
+  isVisible: z.boolean().nullish(),
+  alpha: z.number().min(0).max(1).nullish(),
+  blendMode: z.string().nullish(),
+  name: z.string().nullish(),
+  colorStyleId: z.string().nullish(),
+};
+export const gradientPaintSchema = z
+  .object({
+    type: z.enum([
+      "GRADIENT_LINEAR",
+      "GRADIENT_RADIAL",
+      "GRADIENT_ANGULAR",
+      "GRADIENT_DIAMOND",
+    ]),
+    transform: transformSchema,
+    gradientStops: z.array(colorStopSchema).min(1),
+    gradientHandlePositions: z.tuple([pointSchema, pointSchema]).nullish(),
+    ...paintCommonSchema,
+  })
+  .strict();
+export const imagePaintSchema = z
+  .object({
+    type: z.literal("IMAGE"),
+    imageRef: z.string().min(1),
+    scaleMode: z.enum(["FILL", "TILE", "STRETCH", "FIT", "CROP"]).nullish(),
+    filters: jsonObjectSchema.nullish(),
+    ratio: z.number().nullish(),
+    rotation: z.number().nullish(),
+    ...paintCommonSchema,
+  })
+  .strict();
+export const paintSchema = z.union([
+  solidPaintSchema,
+  gradientPaintSchema,
+  imagePaintSchema,
+]);
+export const paintsSchema = z
+  .array(paintSchema)
+  .describe(
+    "Paint array supporting solid, gradient, and image paints.",
+  );
+export const autoLayoutSchema = z
+  .object({
+    flexMode: z.enum(["NONE", "HORIZONTAL", "VERTICAL"]).nullish(),
+    flexWrap: z.enum(["WRAP", "NO_WRAP"]).nullish(),
+    itemSpacing: z.number().nullish(),
+    mainAxisAlignItems: z
+      .enum(["FLEX_START", "FLEX_END", "CENTER", "SPACING_BETWEEN"])
+      .nullish(),
+    crossAxisAlignItems: z.enum(["FLEX_START", "FLEX_END", "CENTER"]).nullish(),
+    mainAxisSizingMode: z.enum(["FIXED", "AUTO"]).nullish(),
+    crossAxisSizingMode: z.enum(["FIXED", "AUTO"]).nullish(),
+    crossAxisAlignContent: z.enum(["AUTO", "SPACE_BETWEEN"]).nullish(),
+    crossAxisSpacing: z.number().nullable().optional(),
+    strokesIncludedInLayout: z.boolean().nullish(),
+    itemReverseZIndex: z.boolean().nullish(),
+    paddingTop: z.number().nullish(),
+    paddingRight: z.number().nullish(),
+    paddingBottom: z.number().nullish(),
+    paddingLeft: z.number().nullish(),
+  })
+  .strict()
+  .describe("Auto-layout properties to set on a frame or container node.");
+export const exportSettingsSchema = z
+  .object({
+    format: z.enum(["JPG", "PNG", "WEBP", "SVG", "PDF"]),
+    isSuffix: z.union([z.boolean(), z.string()]).nullish(),
+    fileName: z.string().nullish(),
+    constraint: jsonObjectSchema.nullish(),
+    useAbsoluteBounds: z.boolean().nullish(),
+    useRenderBounds: z.boolean().nullish(),
+  })
+  .strict();
+export const exportSettingsArraySchema = z
+  .array(exportSettingsSchema)
+  .describe("Export settings array.");
 export const numberSchema = z.number();
 export const nonNegativeNumberSchema = z.number().min(0);
 export const integerIndexSchema = z.number().int().min(0);

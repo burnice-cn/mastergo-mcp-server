@@ -14,15 +14,19 @@ export type JsonSchemaObject = {
 
 export type MasterGoApiMetadata = {
   readonly method: string;
+  readonly category?: string;
   readonly title: string;
   readonly description: string;
   readonly resultDescription: string;
   readonly readOnly: boolean;
 };
 
-export type MasterGoApiListItem = Pick<MasterGoApiMetadata, "method" | "description">;
+export type MasterGoApiListItem = Pick<
+  Required<MasterGoApiMetadata>,
+  "method" | "category" | "description"
+>;
 
-export type MasterGoApiScheme = MasterGoApiMetadata & {
+export type MasterGoApiScheme = Required<MasterGoApiMetadata> & {
   inputScheme: JsonSchemaObject;
 };
 
@@ -42,6 +46,10 @@ export abstract class MasterGoApiStrategy {
     return this.metadata.method;
   }
 
+  get category(): string {
+    return this.metadata.category ?? inferCategory(this.method);
+  }
+
   get title(): string {
     return this.metadata.title;
   }
@@ -53,6 +61,7 @@ export abstract class MasterGoApiStrategy {
   toListItem(): MasterGoApiListItem {
     return {
       method: this.method,
+      category: this.category,
       description: this.description,
     };
   }
@@ -60,8 +69,9 @@ export abstract class MasterGoApiStrategy {
   toScheme(): MasterGoApiScheme {
     return {
       ...this.metadata,
+      category: this.category,
       inputScheme: toJsonSchemaObject(this.strictParamsSchema),
-    };
+    } as MasterGoApiScheme;
   }
 
   async invoke(
@@ -115,6 +125,19 @@ export abstract class MasterGoApiStrategy {
       });
     }
   }
+}
+
+function inferCategory(method: string): string {
+  const parts = method.split(".");
+
+  if (parts[0] === "node" && parts.length >= 3) {
+    return `${parts[0]}.${parts[1]}`;
+  }
+  if (parts[0] === "mg" && parts[1] === "codegen") {
+    return "mg.codegen";
+  }
+
+  return parts[0] || "other";
 }
 
 function toJsonSchemaObject(schema: z.ZodObject): JsonSchemaObject {

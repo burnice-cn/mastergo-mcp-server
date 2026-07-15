@@ -74,17 +74,24 @@ test("preserves registration order and filters method, title, and description ca
     .register(new StubStrategy("node.page", "Read page", "Canvas content"));
 
   assert.deepEqual(registry.list(), [
-    { method: "mg.file", description: "Current file" },
-    { method: "node.page", description: "Canvas content" },
+    { method: "mg.file", category: "mg", description: "Current file" },
+    { method: "node.page", category: "node", description: "Canvas content" },
   ]);
   assert.deepEqual(registry.list({ query: "NODE.PAGE" }), [
-    { method: "node.page", description: "Canvas content" },
+    { method: "node.page", category: "node", description: "Canvas content" },
   ]);
   assert.deepEqual(registry.list({ query: "  DOCUMENT  " }), [
-    { method: "mg.file", description: "Current file" },
+    { method: "mg.file", category: "mg", description: "Current file" },
   ]);
   assert.deepEqual(registry.list({ query: "CANVAS" }), [
-    { method: "node.page", description: "Canvas content" },
+    { method: "node.page", category: "node", description: "Canvas content" },
+  ]);
+  assert.deepEqual(registry.list({ category: "node" }), [
+    { method: "node.page", category: "node", description: "Canvas content" },
+  ]);
+  assert.deepEqual(registry.categories(), [
+    { id: "mg", count: 1 },
+    { id: "node", count: 1 },
   ]);
 });
 
@@ -193,14 +200,15 @@ test("keeps registered lookup and forwarding stable when caller metadata mutates
   metadata.description = "Mutated description";
 
   assert.deepEqual(registry.list(), [
-    { method: "mg.document", description: "Current file" },
+    { method: "mg.document", category: "mg", description: "Current file" },
   ]);
   assert.deepEqual(registry.list({ query: "read document" }), [
-    { method: "mg.document", description: "Current file" },
+    { method: "mg.document", category: "mg", description: "Current file" },
   ]);
   assert.deepEqual(registry.list({ query: "mutated" }), []);
   assert.deepEqual(registry.getScheme("mg.document"), {
     method: "mg.document",
+    category: "mg",
     title: "Read document",
     description: "Current file",
     resultDescription: "Read document result.",
