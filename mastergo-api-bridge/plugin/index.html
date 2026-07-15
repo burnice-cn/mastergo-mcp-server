@@ -80,14 +80,43 @@
         const endpointEl = document.getElementById('endpoint');
         const lastEventEl = document.getElementById('last-event');
         const pendingPluginRequests = new Map();
+        let activeSocket = null;
+        let reconnectTimer = null;
+        let heartbeatTimer = null;
+        let reconnectAttempt = 0;
+        let connectionSerial = 0;
+
+        const HEARTBEAT_INTERVAL_MS = 5000;
+        const BASE_RECONNECT_DELAY_MS = 1000;
+        const MAX_RECONNECT_DELAY_MS = 10000;
 
         endpointEl.textContent = endpoint;
         connect();
 
         function connect() {
+            if (activeSocket && (
+                activeSocket.readyState === WebSocket.OPEN ||
+                activeSocket.readyState === WebSocket.CONNECTING
+            )) {
+                return;
+            }
+
+            clearReconnectTimer();
+            clearHeartbeat();
+
+            const serial = ++connectionSerial;
             const ws = new WebSocket(endpoint);
+            activeSocket = ws;
+            setStatus('Connecting', false);
+            setLastEvent(`Connecting to mcp-server (${reconnectAttempt + 1})`);
 
             ws.addEventListener('open', () => {
+                if (serial !== connectionSerial) {
+                    ws.close();
+                    return;
+                }
+
+                reconnectAttempt = 0;
                 setStatus('Connected', true);
                 setLastEvent('Connected to mcp-server');
                 ws.send(JSON.stringify({
@@ -96,9 +125,14 @@
                     version: '0.1.0',
                     capabilities: ['mastergo.invoke']
                 }));
+                startHeartbeat(ws, serial);
             });
 
             ws.addEventListener('message', async (event) => {
+                if (serial !== connectionSerial) {
+                    return;
+                }
+
                 let message;
 
                 try {
@@ -138,15 +172,84 @@
                 }
             });
 
-            ws.addEventListener('close', () => {
+            ws.addEventListener('close', (event) => {
+                if (serial !== connectionSerial) {
+                    return;
+                }
+
+                clearHeartbeat();
+                activeSocket = null;
                 setStatus('Disconnected', false);
-                setLastEvent('Reconnecting in 1000ms');
-                setTimeout(connect, 1000);
+                scheduleReconnect(`Disconnected (${event.code || 'unknown'})`);
             });
 
             ws.addEventListener('error', () => {
+                if (serial !== connectionSerial) {
+                    return;
+                }
+
                 setStatus('Connection error', false);
+                try {
+                    ws.close();
+                } catch (error) {
+                    scheduleReconnect('Connection error');
+                }
             });
+        }
+
+        function scheduleReconnect(reason) {
+            if (reconnectTimer) {
+                return;
+            }
+
+            const delay = Math.min(
+                MAX_RECONNECT_DELAY_MS,
+                BASE_RECONNECT_DELAY_MS * 2 ** reconnectAttempt
+            );
+            reconnectAttempt += 1;
+            setLastEvent(`${reason}. Reconnecting in ${delay}ms`);
+            reconnectTimer = setTimeout(() => {
+                reconnectTimer = null;
+                connect();
+            }, delay);
+        }
+
+        function clearReconnectTimer() {
+            if (!reconnectTimer) {
+                return;
+            }
+
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
+
+        function startHeartbeat(ws, serial) {
+            clearHeartbeat();
+            heartbeatTimer = setInterval(() => {
+                if (serial !== connectionSerial) {
+                    clearHeartbeat();
+                    return;
+                }
+                if (ws.readyState === WebSocket.OPEN) {
+                    return;
+                }
+
+                clearHeartbeat();
+                try {
+                    ws.close();
+                } catch (error) {
+                    scheduleReconnect('Heartbeat detected closed socket');
+                }
+            }, HEARTBEAT_INTERVAL_MS);
+        }
+
+        function clearHeartbeat() {
+            if (!heartbeatTimer) {
+                return;
+            }
+
+            clearInterval(heartbeatTimer);
+            heartbeatTimer = null;
         }
 
         function callPlugin(payload) {
