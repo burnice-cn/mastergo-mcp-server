@@ -44,9 +44,6 @@ yarn install
 
 ```bash
 cd mcp-server
-set -a
-. ./.env.example
-set +a
 yarn dev
 ```
 
@@ -99,23 +96,17 @@ MCP 客户端需要连接：
 http://127.0.0.1:3000/mcp
 ```
 
-如果客户端只支持 stdio MCP，可以使用 `mcp-remote` 转接：
+HTTP MCP 配置示例：
 
 ```json
 {
   "mcpServers": {
     "mastergo": {
-      "command": "npx",
-      "args": ["mcp-remote", "http://127.0.0.1:3000/mcp"]
+      "url": "http://127.0.0.1:3000/mcp",
+      "type": "http"
     }
   }
 }
-```
-
-Deep Code 示例配置位置：
-
-```text
-~/.deepcode/settings.json
 ```
 
 启动客户端后，可通过客户端的 MCP 状态命令查看 `mastergo` 是否连接成功。
