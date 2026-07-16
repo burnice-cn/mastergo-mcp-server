@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">MasterGo API Bridge plugin market cover</title>
+  <desc id="desc">A clean product cover for the mastergo-api-bridge plugin, showing MasterGo connected to an MCP server over WebSocket.</desc>
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fbff"/>
+      <stop offset="48%" stop-color="#eef7f5"/>
+      <stop offset="100%" stop-color="#fff7ec"/>
+    </linearGradient>
+    <linearGradient id="titleGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="56%" stop-color="#164e63"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="bridgeGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="48%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="panelGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f6fafc"/>
+    </linearGradient>
+    <linearGradient id="serverGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f2937"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <pattern id="gridPattern" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#dbe7ea" stroke-width="1" opacity="0.58"/>
+    </pattern>
+    <filter id="softShadow" x="-16%" y="-16%" width="132%" height="132%">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#475569" flood-opacity="0.16"/>
+    </filter>
+    <filter id="smallShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .sans {
+        font-family: "Noto Sans CJK SC", "Liberation Sans", "DejaVu Sans", Arial, sans-serif;
+        letter-spacing: 0;
+      }
+
+      .mono {
+        font-family: "DejaVu Sans Mono", "Liberation Mono", ui-monospace, monospace;
+        letter-spacing: 0;
+      }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bgGradient)"/>
+  <rect width="1600" height="900" fill="url(#gridPattern)" opacity="0.72"/>
+
+  <path d="M -60 756 C 160 672, 270 796, 468 706 C 702 600, 842 326, 1086 304 C 1278 286, 1398 398, 1660 288" fill="none" stroke="#d6f4ef" stroke-width="96" stroke-linecap="round" opacity="0.62"/>
+  <path d="M 104 150 C 330 90, 530 134, 742 88 C 906 52, 1060 28, 1260 68 C 1412 98, 1518 70, 1608 42" fill="none" stroke="#fde7bc" stroke-width="64" stroke-linecap="round" opacity="0.66"/>
+
+  <g transform="translate(108 126)">
+    <rect x="0" y="0" width="126" height="126" rx="32" fill="#111827" filter="url(#smallShadow)"/>
+    <path d="M 33 36 L 72 36 C 88 36 98 46 98 61 C 98 77 87 87 70 87 L 55 87 L 55 70 L 69 70 C 76 70 81 67 81 61 C 81 55 76 52 69 52 L 51 52 L 51 91 L 33 91 Z" fill="#ffffff"/>
+    <circle cx="96" cy="34" r="12" fill="#10b981"/>
+    <circle cx="96" cy="34" r="5" fill="#ffffff"/>
+  </g>
+
+  <g class="sans" transform="translate(108 304)">
+    <text x="0" y="0" font-size="82" font-weight="800" fill="url(#titleGradient)">MasterGo</text>
+    <text x="0" y="96" font-size="82" font-weight="800" fill="url(#titleGradient)">API Bridge</text>
+    <text x="2" y="172" font-size="31" font-weight="500" fill="#334155">连接 MasterGo 与 MCP Server 的本地插件桥接器</text>
+    <text x="2" y="224" font-size="25" font-weight="500" fill="#64748b">WebSocket bridge for canvas automation and inspect workflows</text>
+  </g>
+
+  <g class="sans" transform="translate(108 592)">
+    <g>
+      <rect x="0" y="0" width="154" height="46" rx="23" fill="#e0f7fa" stroke="#9ee8ef"/>
+      <circle cx="28" cy="23" r="7" fill="#06b6d4"/>
+      <text x="48" y="30" font-size="18" font-weight="700" fill="#155e75">WebSocket</text>
+    </g>
+    <g transform="translate(172 0)">
+      <rect x="0" y="0" width="194" height="46" rx="23" fill="#e8f8ef" stroke="#b8efd0"/>
+      <circle cx="28" cy="23" r="7" fill="#10b981"/>
+      <text x="48" y="30" font-size="18" font-weight="700" fill="#166534">mastergo.invoke</text>
+    </g>
+    <g transform="translate(386 0)">
+      <rect x="0" y="0" width="112" height="46" rx="23" fill="#fff4d8" stroke="#f9d778"/>
+      <circle cx="28" cy="23" r="7" fill="#f59e0b"/>
+      <text x="48" y="30" font-size="18" font-weight="700" fill="#92400e">Inspect</text>
+    </g>
+  </g>
+
+  <g class="sans" transform="translate(108 766)">
+    <rect x="0" y="-34" width="494" height="58" rx="12" fill="#ffffff" opacity="0.64"/>
+    <text x="24" y="2" font-size="22" font-weight="700" fill="#0f172a">mastergo-api-bridge</text>
+    <text x="278" y="2" font-size="20" font-weight="600" fill="#64748b">local-first plugin</text>
+  </g>
+
+  <g transform="translate(712 114)" filter="url(#softShadow)">
+    <rect x="0" y="0" width="404" height="286" rx="32" fill="url(#panelGradient)" stroke="#dbe7ea"/>
+    <g class="sans">
+      <text x="34" y="58" font-size="26" font-weight="800" fill="#0f172a">MasterGo Canvas</text>
+      <text x="34" y="92" font-size="18" font-weight="500" fill="#64748b">canvas + devMode</text>
+    </g>
+    <rect x="34" y="122" width="142" height="92" rx="18" fill="#dff8ee" stroke="#94e5c1"/>
+    <rect x="194" y="122" width="176" height="42" rx="16" fill="#e8f4ff" stroke="#b6d9ff"/>
+    <rect x="194" y="180" width="116" height="42" rx="16" fill="#fff0d2" stroke="#ffd389"/>
+    <path d="M 80 238 C 118 258, 196 260, 258 238" fill="none" stroke="#0f766e" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="92" cy="152" r="18" fill="#10b981"/>
+    <circle cx="132" cy="184" r="18" fill="#06b6d4"/>
+    <circle cx="254" cy="143" r="12" fill="#3b82f6"/>
+    <circle cx="284" cy="201" r="12" fill="#f59e0b"/>
+  </g>
+
+  <g transform="translate(1132 484)" filter="url(#softShadow)">
+    <rect x="0" y="0" width="336" height="236" rx="30" fill="url(#serverGradient)"/>
+    <g class="sans">
+      <text x="32" y="54" font-size="25" font-weight="800" fill="#f8fafc">MCP Server</text>
+      <text x="32" y="100" font-size="17" font-weight="500" fill="#a7f3d0">127.0.0.1:3000</text>
+    </g>
+    <g class="mono" font-size="17" font-weight="700">
+      <text x="32" y="144" fill="#67e8f9">health</text>
+      <text x="134" y="144" fill="#e2e8f0">ok</text>
+      <text x="32" y="176" fill="#67e8f9">bridge</text>
+      <text x="134" y="176" fill="#e2e8f0">connected</text>
+      <text x="32" y="208" fill="#67e8f9">tools</text>
+      <text x="134" y="208" fill="#e2e8f0">invoke</text>
+    </g>
+    <circle cx="296" cy="50" r="10" fill="#10b981"/>
+  </g>
+
+  <g transform="translate(772 358)">
+    <path d="M 0 0 C 156 92, 264 114, 380 212" fill="none" stroke="#ffffff" stroke-width="30" stroke-linecap="round" opacity="0.92"/>
+    <path d="M 0 0 C 156 92, 264 114, 380 212" fill="none" stroke="url(#bridgeGradient)" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="74" cy="42" r="18" fill="#ffffff" stroke="#06b6d4" stroke-width="8"/>
+    <circle cx="210" cy="99" r="18" fill="#ffffff" stroke="#10b981" stroke-width="8"/>
+    <circle cx="334" cy="172" r="18" fill="#ffffff" stroke="#f59e0b" stroke-width="8"/>
+  </g>
+
+  <g class="sans" transform="translate(902 402)">
+    <rect x="0" y="0" width="284" height="76" rx="18" fill="#ffffff" stroke="#dbe7ea" filter="url(#smallShadow)"/>
+    <text x="28" y="31" font-size="18" font-weight="800" fill="#0f172a">WebSocket Channel</text>
+    <text x="28" y="57" font-size="16" font-weight="600" fill="#64748b">request / response / heartbeat</text>
+  </g>
+
+  <g transform="translate(714 616)" filter="url(#smallShadow)">
+    <rect x="0" y="0" width="336" height="104" rx="24" fill="#ffffff" stroke="#dbe7ea"/>
+    <g class="sans">
+      <text x="28" y="38" font-size="19" font-weight="800" fill="#0f172a">Plugin Runtime</text>
+      <text x="28" y="70" font-size="17" font-weight="600" fill="#64748b">typed protocol + handlers</text>
+    </g>
+    <g transform="translate(250 28)">
+      <rect x="0" y="0" width="46" height="46" rx="13" fill="#ecfeff" stroke="#a5f3fc"/>
+      <path d="M 14 23 L 22 31 L 34 15" fill="none" stroke="#0891b2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <g opacity="0.9">
+    <circle cx="1332" cy="156" r="8" fill="#06b6d4"/>
+    <circle cx="1388" cy="198" r="5" fill="#10b981"/>
+    <circle cx="1274" cy="236" r="6" fill="#f59e0b"/>
+    <circle cx="1462" cy="284" r="9" fill="#14b8a6"/>
+    <path d="M 1292 190 L 1378 224 L 1440 168" fill="none" stroke="#c7d2fe" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

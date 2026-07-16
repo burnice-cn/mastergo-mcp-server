@@ -20,6 +20,11 @@ MCP 客户端 -> http://127.0.0.1:3000/mcp -> mcp-server
 - 支持 API 分类查询，降低 MCP 客户端选择 API 的上下文成本。
 - MasterGo 插件 bridge 支持断线自动重连。
 
+
+## 参考
+该MCP参考以下项目思路实现：
+[`whwanyt/mastergo-mcp-plugin`](https://github.com/whwanyt/mastergo-mcp-plugin).
+
 ## 环境要求
 
 - Node.js 20+
